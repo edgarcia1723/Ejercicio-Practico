@@ -1,0 +1,219 @@
+DROP DATABASE IF EXISTS EduManage;
+
+CREATE DATABASE EduManage;
+
+USE EduManage;
+
+CREATE TABLE tb_profesores(
+id_profesor VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+nombre VARCHAR(100),
+apellido VARCHAR(100),
+correo_electronico VARCHAR(100)
+);
+
+CREATE TABLE tb_materias(
+id_materia VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+nombre_materia VARCHAR(100),
+grupo_materia INT,
+id_profesor INT,
+cupos_disponibles INT
+);
+
+CREATE TABLE tb_inscripciones(
+id_inscripcion VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+id_alumno INT,
+id_materia INT,
+fecha_inscripcion DATE,
+estado ENUM('Activo','Inactivo') 
+);
+
+CREATE TABLE tb_alumnos(
+id_alumno VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+carnet_alumno VARCHAR(50),
+nombre_alumno VARCHAR(50),
+apellido_alumno VARCHAR(50),
+edad_alumno INT
+);
+
+CREATE TABLE tb_calificaciones(
+id_calificacion VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+id_inscripcion INT,
+calificacion_final DECIMAL(3,2) CHECK (calificacion_final >= 7),
+fecha_calificacion DATE
+);
+
+
+-- fK DE LAS TABLAS --
+
+ALTER TABLE tb_materias ADD CONSTRAINT Fk_Materias FOREIGN KEY (id_profesor) REFERENCES tb_profesores(id_profesor)
+
+ALTER TABLE tb_inscripciones ADD CONSTRAINT Fk_Inscripciones FOREIGN KEY (id_materia) REFERENCES tb_materias(id_materia)
+
+ALTER TABLE tb_inscripciones ADD CONSTRAINT Fk_InscripcionesA FOREIGN KEY (id_alumno) REFERENCES tb_alumnos(id_alumno)
+
+ALTER TABLE tb_calificaciones ADD CONSTRAINT Fk_Calificaciones FOREIGN KEY (id_inscripcion) REFERENCES tb_inscripciones(id_inscripcion)
+
+-- trigger --
+
+DELIMITER //
+CREATE TRIGGER materias_inscripcion_trigger
+AFTER INSERT ON tb_inscripciones
+FOR EACH ROW
+BEGIN
+    -- Actualizar los cupos de la materia después de que un alumno se haya inscrito
+    UPDATE tb_materias
+    SET cupos_disponibles = cupos_disponibles - 1
+    WHERE id_materia = NEW.id_materia;
+END;
+
+-- DROP TRIGGER materias_inscripcion_trigger;
+
+-- Inserts de datos--
+DELIMITER //
+
+CREATE PROCEDURE InsertarProfesores(
+    IN nombre VARCHAR(100
+    IN apellido VARCHAR(100
+    IN correo_electronico VARCHAR(100)
+)
+BEGIN
+    INSERT INTO Profesor (nombre, apellido, correo_electronico) 
+	 VALUES (nombre, apellido, correo_electronico);
+END //
+
+DELIMITER ;
+
+CALL InsertarProfesores('Juan', 'Perez', 'juan@example.com');
+CALL InsertarProfesores('María', 'Gómez', 'maria@example.com');
+CALL InsertarProfesores('Luis', 'Martínez', 'luis@example.com');
+CALL InsertarProfesores('Ana', 'Rodríguez', 'ana@example.com');
+CALL InsertarProfesores('Carlos', 'López', 'carlos@example.com');
+CALL InsertarProfesores('Laura', 'Sánchez', 'laura@example.com');
+CALL InsertarProfesores('Pedro', 'García', 'pedro@example.com');
+CALL InsertarProfesores('Sofía', 'Fernández', 'sofia@example.com');
+CALL InsertarProfesores('Javier', 'Díaz', 'javier@example.com');
+CALL InsertarProfesores('Elena', 'Ruiz', 'elena@example.com');
+CALL InsertarProfesores('David', 'Hernández', 'david@example.com');
+CALL InsertarProfesores('Marta', 'Torres', 'marta@example.com');
+CALL InsertarProfesores('Alberto', 'Jiménez', 'alberto@example.com');
+CALL InsertarProfesores('Carmen', 'Núñez', 'carmen@example.com');
+
+
+DELIMITER //
+
+CREATE PROCEDURE InsertarAlumnos(
+    IN carnet_alumno VARCHAR(100
+    IN nombre_alumno VARCHAR(100
+    IN apellido_alumno VARCHAR(100)
+    IN edad_alumno INT
+)
+BEGIN
+    INSERT INTO Alumnos (carnet_alumno, nombre_alumno, apellido_alumno, edad_alumno) 
+	 VALUES (carnet_alumno, nombre_alumno, apellido_alumno, edad_alumno);
+END //
+
+DELIMITER ;
+
+CALL InsertarAlumnos('6546', 'Camilon', 'Perez', '13');
+CALL InsertarAlumnos('9872', 'María', 'González', '25');
+CALL InsertarAlumnos('1234', 'Pedro', 'Ramírez', '18');
+CALL InsertarAlumnos('5678', 'Laura', 'Martínez', '30');
+CALL InsertarAlumnos('3456', 'Juan', 'López', '22');
+CALL InsertarAlumnos('7890', 'Ana', 'Hernández', '27');
+CALL InsertarAlumnos('2345', 'Carlos', 'García', '21');
+CALL InsertarAlumnos('8901', 'Sofía', 'Díaz', '19');
+CALL InsertarAlumnos('4567', 'Luis', 'Fernández', '26');
+CALL InsertarAlumnos('6789', 'Lucía', 'Sánchez', '24');
+CALL InsertarAlumnos('9012', 'Diego', 'Torres', '20');
+CALL InsertarAlumnos('4321', 'Valeria', 'Paz', '28');
+CALL InsertarAlumnos('2109', 'Mateo', 'Ríos', '23');
+CALL InsertarAlumnos('8765', 'Isabel', 'Álvarez', '29');
+
+
+DELIMITER //
+
+CREATE PROCEDURE InsertarMaterias(
+    IN nombre_materia VARCHAR(100
+    IN grupo_materia VARCHAR(100
+    IN cupos_disponibles VARCHAR(100)
+)
+BEGIN
+    INSERT INTO Materias (nombre_materia, grupo_materia, cupos_disponibles) 
+	 VALUES (nombre_materia, grupo_materia, cupos_disponibles);
+END //
+
+DELIMITER ;
+
+CALL InsertarMaterias('Matematica', '1', '135');
+CALL InsertarMaterias('Física', '2', '120');
+CALL InsertarMaterias('Química', '1', '90');
+CALL InsertarMaterias('Biología', '3', '110');
+CALL InsertarMaterias('Historia', '2', '80');
+CALL InsertarMaterias('Literatura', '1', '70');
+CALL InsertarMaterias('Inglés', '3', '100');
+CALL InsertarMaterias('Programación', '2', '140');
+CALL InsertarMaterias('Economía', '1', '60');
+CALL InsertarMaterias('Arte', '3', '130');
+CALL InsertarMaterias('Geografía', '1', '110');
+CALL InsertarMaterias('Filosofía', '2', '100');
+CALL InsertarMaterias('Educación Física', '3', '80');
+CALL InsertarMaterias('Ciencias Sociales', '1', '150');
+
+
+DELIMITER //
+
+CREATE PROCEDURE InsertarInscripcion(
+    IN fecha_inscripcion VARCHAR(100
+    IN estado ENUM ('Activo','Inactivo')
+)
+BEGIN
+    INSERT INTO Inscripcion (fecha_inscripcion, estado) 
+	 VALUES (fecha_inscripcion, estado);
+END //
+
+DELIMITER ;
+
+CALL InsertarInscripcion('2024/02/24','Activo');
+CALL InsertarInscripcion('2024/02/25','Inactivo');
+CALL InsertarInscripcion('2024/02/26','Activo');
+CALL InsertarInscripcion('2024/02/27','Inactivo');
+CALL InsertarInscripcion('2024/02/28','Activo');
+CALL InsertarInscripcion('2024/03/01','Inactivo');
+CALL InsertarInscripcion('2024/03/02','Activo');
+CALL InsertarInscripcion('2024/03/03','Inactivo');
+CALL InsertarInscripcion('2024/03/04','Activo');
+CALL InsertarInscripcion('2024/03/05','Inactivo');
+CALL InsertarInscripcion('2024/03/06','Activo');
+CALL InsertarInscripcion('2024/03/07','Inactivo');
+CALL InsertarInscripcion('2024/03/08','Activo');
+CALL InsertarInscripcion('2024/03/09','Inactivo');
+
+
+
+DELIMITER //
+
+CREATE PROCEDURE InsertarCalificaciones(
+    IN calificacion_final DECIMAL(3,2) CHECK (calificacion_final >= 7),
+    IN fecha_calificacion DATE
+)
+BEGIN
+    INSERT INTO Calificaciones (calificacion_final, fecha_calificacion) 
+	 VALUES (calificacion_final, fecha_calificacion);
+END //
+
+DELIMITER ;
+
+CALL InsertarCalificaciones('7', '2024/06/26');
+CALL InsertarCalificaciones('8', '2024/06/27');
+CALL InsertarCalificaciones('9', '2024/06/28');
+CALL InsertarCalificaciones('10', '2024/06/29');
+CALL InsertarCalificaciones('7', '2024/06/30');
+CALL InsertarCalificaciones('8', '2024/07/01');
+CALL InsertarCalificaciones('9', '2024/07/02');
+CALL InsertarCalificaciones('10', '2024/07/03');
+CALL InsertarCalificaciones('7', '2024/07/04');
+CALL InsertarCalificaciones('8', '2024/07/05');
+CALL InsertarCalificaciones('9', '2024/07/06');
+CALL InsertarCalificaciones('10', '2024/07/07');
+CALL InsertarCalificaciones('7', '2024/07/08');
+CALL InsertarCalificaciones('8', '2024/07/09');
